@@ -36,6 +36,12 @@ public class Produto implements Registro {
     public void setId(int id) {
         this.id = id;
     }
+    public String getGtin13() {
+        return gtin13;
+    }
+    public void setGtin13(String gtin13) {
+        this.gtin13 = gtin13;
+    }
 
     public String getNome() {
         return nome;
