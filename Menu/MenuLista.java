@@ -25,25 +25,24 @@ public class MenuLista {
         arqUsu = new ArquivoUsuario();
         arqList = new ArquivoLista();
         console = new Scanner(System.in);
-        iCode = new HashExtensivel<>(ParCID.class.getConstructor(), 
-        4, 
-        ".\\Dados\\lista\\listaCodigo.d.db", 
-        ".\\Dados\\lista\\listaCodigo.c.db");
+        iCode = new HashExtensivel<>(ParCID.class.getConstructor(),
+                4,
+                ".\\Dados\\lista\\listaCodigo.d.db",
+                ".\\Dados\\lista\\listaCodigo.c.db");
 
-        arvoreLista = new ArvoreBMais<>(ParUsuarioLista.class.getConstructor(), 
-        4, 
-        ".\\Dados\\lista\\arvore_usuario_lista.db");
+        arvoreLista = new ArvoreBMais<>(ParUsuarioLista.class.getConstructor(),
+                4,
+                ".\\Dados\\lista\\arvore_usuario_lista.db");
     }
 
     // Criar lista
     public void criarLista(int idUsuario) throws Exception {
         Usuario u = arqUsu.read(idUsuario);
         System.out.println("\n\n\n---------");
-        System.out.println("> Listas - Criação de Listas");        
+        System.out.println("> Listas - Criação de Listas");
         System.out.print("Nome da Lista: ");
         console.nextLine();
         String nomeList = console.nextLine();
-        
 
         System.out.print("Descrição da Lista: ");
         String desq = console.nextLine();
@@ -61,10 +60,10 @@ public class MenuLista {
         }
 
         Lista lista = new Lista(nomeList, desq, dataExclusao, u.getNome(), idUsuario);
-        int id = arqList.create(lista);     
+        int id = arqList.create(lista);
         iCode.create(new ParCID(lista.getCodigoCompartilhavel(), id));
         arvoreLista.create(new ParUsuarioLista(lista.getIdUsuario(), id));
- 
+
         System.out.println("\nLista criada com sucesso! (ID = " + id + ")");
     }
 
@@ -76,7 +75,7 @@ public class MenuLista {
         int index = 1;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-        for (int i = 1; i <= arqList.tamanho()+1; i++) {
+        for (int i = 1; i <= arqList.tamanho() + 1; i++) {
             Lista lista = arqList.read(i);
             if (lista != null && lista.getIdUsuario() == idUsuario) {
                 String dataStr = (lista.getDataLimite() != null)
@@ -114,7 +113,8 @@ public class MenuLista {
                 String dataStr = lista.getDataLimite() != null
                         ? lista.getDataLimite().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
                         : "Sem data limite";
-                System.out.println("(" + index + ") " + lista.getNome() + " - " + lista.getNomeAutor() +  " - " + dataStr);
+                System.out
+                        .println("(" + index + ") " + lista.getNome() + " - " + lista.getNomeAutor() + " - " + dataStr);
                 index++;
                 count++;
             }
@@ -140,6 +140,14 @@ public class MenuLista {
             System.out.println("Data de Criação: " + lista.getDataCriacao());
             System.out.println("Data de Encerramento: " + lista.getDataLimite());
             System.out.println("Código compartilhável: " + lista.getCodigoCompartilhavel());
+            System.out.println("\n 1 - gerenciar produtos");
+            System.out.println(" 0 - voltar");
+            int op = console.nextInt();
+            if (op == 1) {
+                MenuListaProduto mlp = new MenuListaProduto();
+                mlp.menu(id);
+            }
+
         } else {
             System.out.println("\nLista não encontrada.");
         }
@@ -195,10 +203,9 @@ public class MenuLista {
             arvoreLista.delete(new ParUsuarioLista(lista.getIdUsuario(), id));
             boolean resp = arqList.delete(id);
 
-            if(resp) {
+            if (resp) {
                 System.out.println("Lista excluída com sucesso! ");
-            }
-            else {
+            } else {
                 System.out.println("Não foi possível excluir sua Lista, tente novamente mais tarde.");
             }
         } else {
@@ -206,7 +213,7 @@ public class MenuLista {
         }
     }
 
-    public void menu(int idUsuario) throws Exception{
+    public void menu(int idUsuario) throws Exception {
         console = new Scanner(System.in);
         int opcao;
         do {
@@ -217,7 +224,7 @@ public class MenuLista {
             System.out.println("1 - Criar Lista");
             System.out.println("2 - Buscar Lista");
             System.out.println("3 - Excluir Lista");
-            System.out.println("4 - Editar Lista");
+            System.out.println("4 - Editar dados da Lista");
             System.out.println("5 - Ver minhas Listas");
             System.out.print("\nOpção: ");
 
@@ -228,20 +235,28 @@ public class MenuLista {
                 case 0:
                     System.out.println("Voltando...");
                     break;
-                case 1: criarLista(idUsuario);
+                case 1:
+                    criarLista(idUsuario);
                     break;
-                case 2: buscarLista();
+                case 2:
+                    buscarLista();
                     break;
-                case 3: id = listarListasUsuario(idUsuario); excluirLista(id);
+                case 3:
+                    id = listarListasUsuario(idUsuario);
+                    excluirLista(id);
                     break;
-                case 4: id = listarListasUsuario(idUsuario); editarLista(id);
+                case 4:
+                    id = listarListasUsuario(idUsuario);
+                    editarLista(id);
                     break;
-                case 5: id = listarListasUsuario(idUsuario); verLista(id);
+                case 5:
+                    id = listarListasUsuario(idUsuario);
+                    verLista(id);
                     break;
                 default:
                     break;
             }
-        } while(opcao != 0);
+        } while (opcao != 0);
     }
 
     public void buscarLista() throws Exception {
@@ -252,16 +267,17 @@ public class MenuLista {
         String codigoComp = console.nextLine();
         try {
             ParCID pcid = iCode.read(new ParCID(codigoComp, -1).hashCode());
-            if(pcid != null) {
+            if (pcid != null) {
                 Lista lista = arqList.read(pcid.getId());
-                if(lista != null) {
+                if (lista != null) {
                     System.out.println("Lista encontrada!");
                     mostrarLista(lista);
                 }
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             System.out.println("Código inválido.");
-        };
+        }
+        ;
 
     }
 
