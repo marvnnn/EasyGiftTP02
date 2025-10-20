@@ -46,7 +46,7 @@ public class MenuListaProduto {
     /**
      * Menu principal de Produtos dentro de uma Lista
      */
-    public void menu(int idLista,int idUsuario) throws Exception {
+    public void menu(int idLista, int idUsuario) throws Exception {
         int opcao;
         do {
             System.out.println("\n\n---------");
@@ -63,7 +63,7 @@ public class MenuListaProduto {
                     System.out.println("Voltando...");
                     break;
                 case 1:
-                    incluirProduto(idLista,idUsuario);
+                    incluirProduto(idLista, idUsuario);
                     break;
                 case 2:
                     excluirProduto(idLista);
@@ -81,11 +81,13 @@ public class MenuListaProduto {
     /**
      * Inclui um produto em uma lista
      */
-    public void incluirProduto(int idLista,int idUsuario) throws Exception {
+    public void incluirProduto(int idLista, int idUsuario) throws Exception {
         menuProduto = new MenuProduto();
-        int idProduto = menuProduto.listarProdutos(idUsuario); // ✅ lista produtos e retorna o ID escolhido
+        int idProduto = menuProduto.listarProdutos(idUsuario); // Lista produtos e retorna o ID escolhido
         if (idProduto != -1) {
-            ListaProduto lp = new ListaProduto(idLista, idProduto);
+            // Criando a relação ListaProduto com quantidade 1 e observações vazias por
+            // padrão
+            ListaProduto lp = new ListaProduto(idLista, idProduto, 1, "");
             int id = arqListaProduto.create(lp);
             indiceListaProduto.create(new ParIDListaProduto(idLista, idProduto));
             System.out.println("✅ Produto adicionado à lista (ID da relação = " + id + ")");
@@ -160,6 +162,9 @@ public class MenuListaProduto {
     /**
      * Lista todos os produtos de uma lista
      */
+    /**
+     * Lista todos os produtos de uma lista, mostrando quantidade e observações
+     */
     public void listarProdutos(int idLista) {
         System.out.println("\n\n---------");
         System.out.println("> Lista de Produtos - ID da Lista: " + idLista);
@@ -172,7 +177,6 @@ public class MenuListaProduto {
             arqListaProduto.arquivo.seek(12); // pula o cabeçalho (4 + 8 bytes)
 
             while (arqListaProduto.arquivo.getFilePointer() < arqListaProduto.arquivo.length()) {
-                long pos = arqListaProduto.arquivo.getFilePointer();
                 byte lapide = arqListaProduto.arquivo.readByte();
                 short tam = arqListaProduto.arquivo.readShort();
 
@@ -186,7 +190,9 @@ public class MenuListaProduto {
                     if (lp.getIdLIsta() == idLista) {
                         Produto produto = arqProduto.read(lp.getIdProduto());
                         if (produto != null) {
-                            System.out.println("(" + index + ") " + produto.getNome() + " - " + produto.getDescricao());
+                            System.out.println("(" + index + ") " + produto.getNome() + " (x"
+                                    + lp.getQuantidade() + ") - Observações: "
+                                    + lp.getObservacoes());
                             index++;
                             count++;
                         }
