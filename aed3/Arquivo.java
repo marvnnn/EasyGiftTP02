@@ -6,7 +6,7 @@ import java.lang.reflect.Constructor;
 
 public class Arquivo<T extends Registro> {
     final int TAM_CABECALHO = 12;
-    protected RandomAccessFile arquivo;
+    public RandomAccessFile arquivo;
     String nomeArquivo;
     Constructor<T> construtor;
     HashExtensivel<ParIDEndereco> indiceDireto;
@@ -71,16 +71,16 @@ public class Arquivo<T extends Registro> {
         byte lapide;
 
         ParIDEndereco pid = indiceDireto.read(id);
-        if(pid!=null) {
+        if (pid != null) {
             arquivo.seek(pid.getEndereco());
             obj = construtor.newInstance();
             lapide = arquivo.readByte();
-            if(lapide==' ') {
+            if (lapide == ' ') {
                 tam = arquivo.readShort();
                 b = new byte[tam];
                 arquivo.read(b);
                 obj.fromByteArray(b);
-                if(obj.getId()==id)
+                if (obj.getId() == id)
                     return obj;
             }
         }
@@ -290,5 +290,8 @@ public class Arquivo<T extends Registro> {
         return total;
     }
 
+    public RandomAccessFile getArquivo() {
+        return this.arquivo;
+    }
 
 }

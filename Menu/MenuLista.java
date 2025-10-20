@@ -131,7 +131,7 @@ public class MenuLista {
     }
 
     // Ver detalhes de uma lista
-    public void verLista(int id) throws Exception {
+    public void verLista(int id,int idUsuario) throws Exception {
         Lista lista = arqList.read(id);
         if (lista != null) {
             System.out.println("\n--- Detalhes da Lista ---");
@@ -145,7 +145,7 @@ public class MenuLista {
             int op = console.nextInt();
             if (op == 1) {
                 MenuListaProduto mlp = new MenuListaProduto();
-                mlp.menu(id);
+                mlp.menu(id,idUsuario);
             }
 
         } else {
@@ -251,7 +251,7 @@ public class MenuLista {
                     break;
                 case 5:
                     id = listarListasUsuario(idUsuario);
-                    verLista(id);
+                    verLista(id,idUsuario);
                     break;
                 default:
                     break;

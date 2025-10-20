@@ -3,12 +3,14 @@ package Menu;
 import java.util.Scanner;
 
 import Entidades.Lista;
+import Entidades.ListaProduto;
 import Entidades.Produto;
 import aed3.ArvoreBMais;
 import aed3.HashExtensivel;
 import aed3.ParIDGTIN;
 import aed3.ParUsuarioLista;
 import Arquivos.ArquivoLista;
+import Arquivos.ArquivoListaProduto;
 import Arquivos.ArquivoProduto;
 import Arquivos.ArquivoUsuario;
 
@@ -16,14 +18,15 @@ public class MenuProduto {
     public Scanner console;
     public ArquivoProduto arqProduto;
     public ArquivoUsuario arqUsu;
+    public ArquivoListaProduto arqListaProduto;
     public ArquivoLista arqList;
     public HashExtensivel<ParIDGTIN> iCode;
     public ArvoreBMais<ParUsuarioLista> arvoreLista;
 
-
     public MenuProduto() throws Exception {
         arqUsu = new ArquivoUsuario();
         arqList = new ArquivoLista();
+        arqListaProduto = new ArquivoListaProduto(); // ✅ inicializa aqui
         arqProduto = new ArquivoProduto(); // Inicializando o arquivo de produtos
         console = new Scanner(System.in);
 
@@ -58,13 +61,13 @@ public class MenuProduto {
                     System.out.println("Voltando...");
                     break;
                 case 1:
-                    buscarProduto();
+                    buscarProduto(idUsuario);
                     break;
                 case 2:
-                    listarProdutos();
+                    listarProdutos(idUsuario);
                     break;
                 case 3:
-                    cadastrarProduto();
+                    cadastrarProduto(idUsuario);
                     break;
                 default:
                     break;
@@ -72,7 +75,7 @@ public class MenuProduto {
         } while (opcao != 0);
     }
 
-    public void cadastrarProduto() throws Exception {
+    public void cadastrarProduto(int idUsuario) throws Exception {
         System.out.println("\n\n\n---------");
         System.out.println("> Produtos - Cadastro de Novo Produto");
 
@@ -90,7 +93,6 @@ public class MenuProduto {
         int id = arqProduto.create(produto);
         iCode.create(new ParIDGTIN(produto.getGtin13(), id));
 
-
         // Se tiver índice, você pode criar aqui
         // iCode.create(new ParIDGTIN(produto.getCodigoCompartilhavel(), id));
         // arvoreProduto.create(new ParUsuarioProduto(idUsuario, id));
@@ -98,7 +100,7 @@ public class MenuProduto {
         System.out.println("\n✅ Produto cadastrado com sucesso! (ID = " + id + ")");
     }
 
-    public int listarProdutos() throws Exception {
+    public int listarProdutos(int idUsuario) throws Exception {
         System.out.println("\n\n---------");
         System.out.println("> Produtos - Listagem de Todos os Produtos");
         System.out.println("---------");
@@ -135,7 +137,7 @@ public class MenuProduto {
                     }
                 }
             }
-            verProduto(escolhido);
+            verProduto(escolhido, idUsuario);
         } else {
             System.out.println("Opção inválida.");
         }
@@ -144,19 +146,88 @@ public class MenuProduto {
     }
 
     // Ver detalhes de um produto
-    public void verProduto(int id) throws Exception {
-        Produto produto = arqProduto.read(id);
+    public void verProduto(int idProduto, int idUsuario) throws Exception {
+        Produto produto = arqProduto.read(idProduto);
         if (produto != null) {
-            System.out.println("\n--- Detalhes do Produto ---");
-            System.out.println("Nome: " + produto.getNome());
-            System.out.println("GTIN-13: " + produto.getGtin13());
-            System.out.println("Descrição: " + produto.getDescricao());
+            System.out.println("\nPresenteFácil 1.0");
+            System.out.println("-----------------");
+            System.out.println("> Início > Produtos > Listagem > " + produto.getNome() + "\n");
+
+            System.out.println("NOME.......: " + produto.getNome());
+            System.out.println("GTIN-13....: " + produto.getGtin13());
+            System.out.println("DESCRIÇÃO..: " + produto.getDescricao());
+            System.out.println();
+
+            int listasUsuario = 0;
+            int listasOutros = 0;
+
+            try {
+                // Percorre o arquivo ListaProduto manualmente
+                arqListaProduto.arquivo.seek(12); // pula cabeçalho
+                System.out.println("Aparece nas minhas listas:");
+                while (arqListaProduto.arquivo.getFilePointer() < arqListaProduto.arquivo.length()) {
+                    long pos = arqListaProduto.arquivo.getFilePointer();
+                    byte lapide = arqListaProduto.arquivo.readByte();
+                    short tam = arqListaProduto.arquivo.readShort();
+
+                    if (lapide == ' ') {
+                        byte[] ba = new byte[tam];
+                        arqListaProduto.arquivo.read(ba);
+
+                        ListaProduto lp = new ListaProduto();
+                        lp.fromByteArray(ba);
+
+                        if (lp.getIdProduto() == idProduto) {
+                            Lista lista = arqList.read(lp.getIdLIsta()); // arqList = arquivo de Listas
+                            if (lista != null) {
+                                if (lista.getIdUsuario() == idUsuario) {
+                                    System.out.println("- " + lista.getNome());
+                                    listasUsuario++;
+                                } else {
+                                    listasOutros++;
+                                }
+                            }
+                        }
+                    } else {
+                        // pula registros excluídos
+                        arqListaProduto.arquivo.skipBytes(tam);
+                    }
+                }
+
+                System.out.println("\nAparece também em mais " + listasOutros + " lista(s) de outras pessoas.");
+
+            } catch (Exception e) {
+                System.err.println("Erro ao verificar listas do produto: " + e.getMessage());
+                e.printStackTrace();
+            }
+
+            System.out.println("\n(1) Alterar os dados do produto");
+            System.out.println("(2) Inativar o produto");
+            System.out.println("\n(R) Retornar ao menu anterior");
+            System.out.print("\nOpção: ");
+
+            String opcao = console.next();
+            switch (opcao.toUpperCase()) {
+                case "1":
+                    editarProduto(idProduto);
+                    break;
+                case "2":
+                    // implementar inativarProduto(idProduto)
+                      inativarProduto(idProduto);
+                    break;
+                case "R":
+                    return;
+                default:
+                    System.out.println("Opção inválida.");
+                    break;
+            }
+
         } else {
             System.out.println("\nProduto não encontrado.");
         }
     }
 
-    public void buscarProduto() throws Exception {
+    public void buscarProduto(int idUsuario) throws Exception {
         console = new Scanner(System.in);
         System.out.println("\n\n---------");
         System.out.println("> Produtos - Buscar Produto");
@@ -170,7 +241,7 @@ public class MenuProduto {
                 Produto produto = arqProduto.read(pcid.getId());
                 if (produto != null) {
                     System.out.println("Produto encontrado!");
-                    verProduto(produto.getId());
+                    verProduto(produto.getId(), idUsuario);
                 } else {
                     System.out.println("Produto não encontrado no arquivo.");
                 }
@@ -182,4 +253,55 @@ public class MenuProduto {
             e.printStackTrace();
         }
     }
+
+    public void editarProduto(int idProduto) throws Exception {
+        Produto produto = arqProduto.read(idProduto);
+        if (produto != null) {
+            System.out.println("\n--- Editar Produto ---");
+            System.out.println("Produto atual: " + produto.getNome() + " - " + produto.getDescricao());
+
+            console.nextLine(); // consumir enter pendente
+            System.out.print("Novo nome (Enter para manter atual): ");
+            String novoNome = console.nextLine();
+            if (!novoNome.isEmpty()) {
+                produto.setNome(novoNome);
+            }
+
+            System.out.print("Nova descrição (Enter para manter atual): ");
+            String novaDescricao = console.nextLine();
+            if (!novaDescricao.isEmpty()) {
+                produto.setDescricao(novaDescricao);
+            }
+
+            boolean atualizado = arqProduto.update(produto);
+            if (atualizado) {
+                System.out.println("\n✅ Produto atualizado com sucesso!");
+            } else {
+                System.out.println("\n❌ Falha ao atualizar o produto.");
+            }
+        } else {
+            System.out.println("Produto não encontrado.");
+        }
+    }
+
+    public void inativarProduto(int idProduto) throws Exception {
+        Produto produto = arqProduto.read(idProduto);
+        if (produto != null) {
+            if (!produto.isAtivo()) {
+                System.out.println("Produto já está inativado.");
+                return;
+            }
+
+            produto.setAtivo(false); // marca como inativo
+            boolean atualizado = arqProduto.update(produto);
+            if (atualizado) {
+                System.out.println("✅ Produto inativado com sucesso!");
+            } else {
+                System.out.println("❌ Falha ao inativar o produto.");
+            }
+        } else {
+            System.out.println("Produto não encontrado.");
+        }
+    }
+
 }

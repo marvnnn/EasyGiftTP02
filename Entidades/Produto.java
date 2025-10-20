@@ -12,12 +12,14 @@ public class Produto implements Registro {
     private String gtin13;
     private String nome;
     private String descricao;
+    private boolean ativo; // ✅ novo atributo
 
     public Produto() {
         this.id = -1;
         this.gtin13 = "0000000000000";
         this.nome = "";
         this.descricao = "";
+        this.ativo = true; // produto inicia como ativo
     }
 
     public Produto(String gtin13, String nome, String descricao) {
@@ -25,8 +27,10 @@ public class Produto implements Registro {
         this.gtin13 = gtin13;
         this.nome = nome;
         this.descricao = descricao;
+        this.ativo = true; // produto inicia como ativo
     }
 
+    // Getters e Setters
     public int getId() {
         return id;
     }
@@ -34,9 +38,11 @@ public class Produto implements Registro {
     public void setId(int id) {
         this.id = id;
     }
+
     public String getGtin13() {
         return gtin13;
     }
+
     public void setGtin13(String gtin13) {
         this.gtin13 = gtin13;
     }
@@ -57,6 +63,14 @@ public class Produto implements Registro {
         this.descricao = descricao;
     }
 
+    public boolean isAtivo() {
+        return ativo;
+    }
+
+    public void setAtivo(boolean ativo) {
+        this.ativo = ativo;
+    }
+
     @Override
     public byte[] toByteArray() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -66,6 +80,7 @@ public class Produto implements Registro {
         dos.writeUTF(this.gtin13);
         dos.writeUTF(this.nome);
         dos.writeUTF(this.descricao);
+        dos.writeBoolean(this.ativo); // ✅ salvar estado ativo/inativo
 
         return baos.toByteArray();
     }
@@ -79,5 +94,6 @@ public class Produto implements Registro {
         this.gtin13 = dis.readUTF();
         this.nome = dis.readUTF();
         this.descricao = dis.readUTF();
+        this.ativo = dis.readBoolean(); // ✅ ler estado ativo/inativo
     }
 }
