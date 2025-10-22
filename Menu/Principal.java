@@ -11,7 +11,7 @@ public class Principal {
 
             int option;
             do {
-                System.out.println("\n\nEasyGift 1.0");
+                System.out.println("\n\nEasyGift 2.0");
                 System.out.println("---------");
                 System.out.println("> Início");
 

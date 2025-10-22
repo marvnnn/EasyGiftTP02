@@ -44,7 +44,7 @@ public class MenuProduto {
         console = new Scanner(System.in);
         int opcao;
         do {
-            System.out.println("\n\nEasyGift 1.0");
+            System.out.println("\n\nEasyGift 2.0");
             System.out.println("---------");
             System.out.println("> Produtos - Autenticado");
             System.out.println("\n0 - Voltar");
@@ -64,7 +64,7 @@ public class MenuProduto {
                     buscarProduto(idUsuario);
                     break;
                 case 2:
-                    listarProdutos(idUsuario);
+                    verProduto(listarProdutos(idUsuario), idUsuario); 
                     break;
                 case 3:
                     cadastrarProduto(idUsuario);
@@ -111,7 +111,12 @@ public class MenuProduto {
         for (int i = 1; i <= arqProduto.tamanho(); i++) { // IDs começam em 1
             Produto p = arqProduto.read(i);
             if (p != null) {
-                System.out.println("(" + index + ") " + p.getNome() + " - " + p.getDescricao());
+                if(p.isAtivo()) {
+                    System.out.println("(" + index + ") " + p.getNome() + " - " + p.getDescricao());
+                }
+                else {
+                    System.out.println("(" + index + ") " + p.getNome() + " - " + p.getDescricao() + " - (INATIVO)");
+                }
                 index++;
             }
         }
@@ -137,7 +142,6 @@ public class MenuProduto {
                     }
                 }
             }
-            verProduto(escolhido, idUsuario);
         } else {
             System.out.println("Opção inválida.");
         }
@@ -149,7 +153,7 @@ public class MenuProduto {
     public void verProduto(int idProduto, int idUsuario) throws Exception {
         Produto produto = arqProduto.read(idProduto);
         if (produto != null) {
-            System.out.println("\nPresenteFácil 1.0");
+            System.out.println("\nEasy Gift 2.0");
             System.out.println("-----------------");
             System.out.println("> Início > Produtos > Listagem > " + produto.getNome() + "\n");
 

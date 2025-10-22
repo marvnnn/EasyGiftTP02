@@ -20,9 +20,11 @@ public class MenuLista {
     private Scanner console;
     private HashExtensivel<ParCID> iCode;
     private ArvoreBMais<ParUsuarioLista> arvoreLista;
+    private MenuListaProduto mlp;
 
     public MenuLista() throws Exception {
         arqUsu = new ArquivoUsuario();
+        mlp = new MenuListaProduto();
         arqList = new ArquivoLista();
         console = new Scanner(System.in);
         iCode = new HashExtensivel<>(ParCID.class.getConstructor(),
@@ -140,11 +142,10 @@ public class MenuLista {
             System.out.println("Data de Criação: " + lista.getDataCriacao());
             System.out.println("Data de Encerramento: " + lista.getDataLimite());
             System.out.println("Código compartilhável: " + lista.getCodigoCompartilhavel());
-            System.out.println("\n 1 - gerenciar produtos");
-            System.out.println(" 0 - voltar");
+            System.out.println("\n 1 - Gerenciar produtos");
+            System.out.println(" 0 - Voltar");
             int op = console.nextInt();
             if (op == 1) {
-                MenuListaProduto mlp = new MenuListaProduto();
                 mlp.menu(id,idUsuario);
             }
 
@@ -217,7 +218,7 @@ public class MenuLista {
         console = new Scanner(System.in);
         int opcao;
         do {
-            System.out.println("\n\nEasyGift 1.0");
+            System.out.println("\n\nEasyGift 2.0");
             System.out.println("---------");
             System.out.println("> Listas - Autenticado");
             System.out.println("\n0 - Voltar");
